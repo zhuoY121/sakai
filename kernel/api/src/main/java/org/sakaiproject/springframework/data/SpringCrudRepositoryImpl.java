@@ -141,7 +141,6 @@ public abstract class SpringCrudRepositoryImpl<T extends PersistableEntity<ID>, 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
