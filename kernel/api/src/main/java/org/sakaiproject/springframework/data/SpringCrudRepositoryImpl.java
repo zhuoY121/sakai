@@ -136,11 +136,7 @@ public abstract class SpringCrudRepositoryImpl<T extends PersistableEntity<ID>, 
 
         Session session = sessionFactory.getCurrentSession();
 
-        try {
-            session.delete(entity);
-        } catch (Exception he) {
-            session.delete(session.merge(entity));
-        }
+        findById(entity.getId()).ifPresent(session::delete);
     }
 
     @Override
@@ -161,7 +157,7 @@ public abstract class SpringCrudRepositoryImpl<T extends PersistableEntity<ID>, 
     @Override
     @Transactional
     public void deleteById(ID id) {
-        findById(id).ifPresent(found -> delete(found));
+        findById(id).ifPresent(this::delete);
     }
 
     /**
