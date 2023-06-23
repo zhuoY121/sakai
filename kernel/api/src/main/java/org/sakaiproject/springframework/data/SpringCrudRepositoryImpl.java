@@ -136,7 +136,12 @@ public abstract class SpringCrudRepositoryImpl<T extends PersistableEntity<ID>, 
 
         Session session = sessionFactory.getCurrentSession();
 
-        findById(entity.getId()).ifPresent(session::delete);
+        try {
+            findById(entity.getId()).ifPresent(session::delete);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
