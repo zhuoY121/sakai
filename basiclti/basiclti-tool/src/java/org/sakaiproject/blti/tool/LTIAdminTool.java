@@ -943,6 +943,60 @@ public class LTIAdminTool extends VelocityPortletPaneledAction {
 		return "lti_tool_insert";
 	}
 
+	public String buildToolCopyPanelContext(VelocityPortlet portlet, Context context,
+											RunData data, SessionState state) {
+
+		context.put("tlang", rb);
+		context.put("includeLatestJQuery", PortalUtils.includeLatestJQuery("LTIAdminTool"));
+		String stateId = (String) state.getAttribute(STATE_ID);
+		state.removeAttribute(STATE_ID);
+		if (!ltiService.isMaintain(getSiteId(state))) {
+			addAlert(state, rb.getString("error.maintain.edit"));
+			return "lti_error";
+		}
+
+		context.put("doToolAction", BUTTON + "doToolPut");
+		context.put("messageSuccess", state.getAttribute(STATE_SUCCESS));
+
+		String[] mappingForm = ltiService.getToolModel(getSiteId(state));
+
+		String id = data.getParameters().getString(LTIService.LTI_ID);
+		if (id == null) {
+			id = stateId;
+		}
+		if (id == null) {
+			addAlert(state, rb.getString("error.id.not.found"));
+			return "lti_error";
+		}
+		Long key = new Long(id);
+		Map<String, Object> tool = ltiService.getTool(key, getSiteId(state));
+		if (tool == null) {
+			return "lti_error";
+		}
+
+		// Hide the old tool secret unless it is incomplete
+		if (!LTIService.LTI_SECRET_INCOMPLETE.equals(tool.get(LTIService.LTI_SECRET))) {
+			tool.put(LTIService.LTI_SECRET, LTIService.SECRET_HIDDEN);
+		}
+
+		// remove id since we are going to create a new tool with new id.
+		tool.remove(LTIService.LTI_ID);
+
+		String formInput = ltiService.formInput(tool, mappingForm);
+
+		context.put("formInput", formInput);
+
+		String site_id = (String) tool.get(LTIService.LTI_SITE_ID);
+		String issuerURL = SakaiBLTIUtil.getIssuer(site_id);
+		context.put("issuerURL", issuerURL);
+
+		context.put("isAdmin", new Boolean(ltiService.isAdmin(getSiteId(state))));
+		context.put("isEdit", Boolean.FALSE);
+
+		state.removeAttribute(STATE_SUCCESS);
+		return "lti_tool_insert";
+	}
+
 	public String buildToolDeletePanelContext(VelocityPortlet portlet, Context context,
 			RunData data, SessionState state) {
 		context.put("tlang", rb);
